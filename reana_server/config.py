@@ -18,7 +18,7 @@ from distutils.util import strtobool
 from limits.util import parse
 from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
 from invenio_oauthclient.contrib import cern_openid
-from invenio_oauthclient.contrib import keycloak
+from invenio_oauthclient.contrib import keycloak as k
 from reana_commons.config import REANA_INFRASTRUCTURE_COMPONENTS_HOSTNAMES
 from reana_commons.job_utils import kubernetes_memory_to_bytes
 
@@ -217,9 +217,49 @@ BREADCRUMBS_ROOT = "breadcrumbs"
 
 # OAuth configuration
 # ===================
+
+# Keycloak configuration with IAM ESCAPE
+
+helper = k.KeycloakSettingsHelper(
+    title="IAM ESCAPE",
+    description="IAM ESCAPE Auth Provider",
+    base_url="https://iam-escape.cloud.cnaf.infn.it/",
+    realm="" # IAM ESCAPE does not have a realm --> This might need to be changed in the hard coded url path
+    )
+
+OAUTHCLIENT_KEYCLOAK_REALM_URL = helper.realm_url
+OAUTHCLIENT_KEYCLOAK_USER_INFO_URL = helper.user_info_url
+
+OAUTHCLIENT_KEYCLOAK_VERIFY_AUD = True
+OAUTHCLIENT_KEYCLOAK_AUD = ""
+
+OAUTHCLIENT_KEYCLOAK_VERIFY_EXP = True
+
+OAUTHCLIENT_REMOTE_APPS = dict(
+    keycloak=helper.remote_app,
+    # request_token_params={'scope': 'email'}, # taken from settings helper
+    # base_url='https://iam-escape.cloud.cnaf.infn.it/', # defined above alraedy
+    # request_token_url=None, # not needed here
+    access_token_url="https://iam-escape.cloud.cnaf.infn.it/token",
+    access_token_method='POST',
+    authorize_url="https://iam-escape.cloud.cnaf.infn.it/authorize",
+    app_key="IAM_ESCAPE_APP_CREDENTIALS",
+    )
+
+IAM_ESCAPE_APP_CREDENTIALS = dict(
+    consumer_key=os.environ.get("IAM_CLIENT_ID"),
+    consumer_secret=os.environ.get("IAM_CLIENT_SECRET"),
+    )
+
+USERPROFILES_EXTEND_SECURITY_FORMS = True
+
+# Previous configuration with CERN OpenID
+
 OAUTH_REDIRECT_URL = "/signin_callback"
 
-OAUTH_REMOTE_REST_APP = copy.deepcopy(cern_openid.REMOTE_REST_APP)
+OAUTHCLIENT_REST_DEFAULT_ERROR_REDIRECT_URL = OAUTH_REDIRECT_URL
+
+""" OAUTH_REMOTE_REST_APP = copy.deepcopy(cern_openid.REMOTE_REST_APP)
 
 OAUTH_REMOTE_REST_APP.update(
     {
@@ -227,8 +267,6 @@ OAUTH_REMOTE_REST_APP.update(
         "error_redirect_url": OAUTH_REDIRECT_URL,
     }
 )
-
-OAUTHCLIENT_REST_DEFAULT_ERROR_REDIRECT_URL = OAUTH_REDIRECT_URL
 
 OAUTHCLIENT_REMOTE_APPS = dict(
     cern_openid=OAUTH_REMOTE_REST_APP,
@@ -241,7 +279,7 @@ OAUTHCLIENT_REST_REMOTE_APPS = dict(
 CERN_APP_OPENID_CREDENTIALS = dict(
     consumer_key=REANA_SSO_CERN_CONSUMER_KEY,
     consumer_secret=REANA_SSO_CERN_CONSUMER_SECRET,
-)
+) """
 
 DEBUG = True
 
