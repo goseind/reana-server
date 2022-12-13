@@ -18,6 +18,7 @@ from distutils.util import strtobool
 from limits.util import parse
 from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
 from invenio_oauthclient.contrib import cern_openid
+from invenio_oauthclient.contrib import keycloak
 from reana_commons.config import REANA_INFRASTRUCTURE_COMPONENTS_HOSTNAMES
 from reana_commons.job_utils import kubernetes_memory_to_bytes
 
