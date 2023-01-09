@@ -14,10 +14,18 @@ import os
 import re
 from typing import Optional
 
+# Override invenio_oauthclient.contrib with local copy of the package
+# import sys
+# import contrib
+# sys.modules['invenio_oauthclient.contrib'] = contrib
+
 from distutils.util import strtobool
 from limits.util import parse
 from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
-from invenio_oauthclient.contrib import cern_openid
+from .contrib import cern_openid # use local module
+# Import keycloak module
+from .contrib.keycloak import KeycloakSettingsHelper
+
 from reana_commons.config import REANA_INFRASTRUCTURE_COMPONENTS_HOSTNAMES
 from reana_commons.job_utils import kubernetes_memory_to_bytes
 
