@@ -40,7 +40,7 @@ class KeycloakSettingsHelper(OAuthSettingsHelper):
         app_key = app_key or "KEYCLOAK_APP_CREDENTIALS"
         base_url = "{}/".format(base_url.rstrip("/"))  # add leading `/`
 
-        self._realm_url = "{}auth/realms/{}".format(base_url, realm)
+        self._realm_url = "{}auth/{}".format(base_url, realm) # remove realm in url and let it set an empty string
 
         access_token_url = self.make_url(self._realm_url, "token")
         authorize_url = self.make_url(self._realm_url, "auth")

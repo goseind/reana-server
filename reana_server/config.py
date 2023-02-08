@@ -22,9 +22,9 @@ from typing import Optional
 from distutils.util import strtobool
 from limits.util import parse
 from invenio_app.config import APP_DEFAULT_SECURE_HEADERS
-from .contrib import cern_openid # use local module
-# Import keycloak module
-from .contrib.keycloak import KeycloakSettingsHelper
+from .contrib import cern_openid # use local module to test if its working
+# Import keycloak module locally
+# from .contrib.keycloak import KeycloakSettingsHelper
 
 from reana_commons.config import REANA_INFRASTRUCTURE_COMPONENTS_HOSTNAMES
 from reana_commons.job_utils import kubernetes_memory_to_bytes
@@ -255,6 +255,34 @@ DEBUG = True
 SECURITY_PASSWORD_SALT = "security-password-salt"
 
 SECURITY_SEND_REGISTER_EMAIL = False
+
+# OAuth configuration Keycloak IAM ESCAPE Test
+# ===================
+
+helper = k.KeycloakSettingsHelper(
+    title="IAM",
+    description="IAM Authentication Service",
+    base_url="https://iam-escape.cloud.cnaf.infn.it",
+    realm_name="", # passing an emtpy string 
+)
+OAUTHCLIENT_KEYCLOAK_REALM_URL = helper.realm_url
+OAUTHCLIENT_KEYCLOAK_USER_INFO_URL = helper.user_info_url
+OAUTHCLIENT_KEYCLOAK_VERIFY_EXP = True  # whether to verify the expiration date of tokens
+OAUTHCLIENT_KEYCLOAK_VERIFY_AUD = True  # whether to verify the audience tag for tokens
+OAUTHCLIENT_KEYCLOAK_AUD = REANA_SSO_CERN_CONSUMER_KEY  # probably the same as the client ID
+KEYCLOAK_APP_CREDENTIALS = {
+    "consumer_key": REANA_SSO_CERN_CONSUMER_KEY, # using predefined CERN variables to pass the IAM credentials (see helm chart)
+    "consumer_secret": REANA_SSO_CERN_CONSUMER_SECRET,
+}
+OAUTHCLIENT_REMOTE_APPS = {
+    "keycloak": helper.remote_app,
+    "params": {
+        "access_token_url": "https://iam-escape.cloud.cnaf.infn.it/token",
+        "access_token_method": "POST",
+        "authorize_url": "https://iam-escape.cloud.cnaf.infn.it/authorize",
+        "app_key": KEYCLOAK_APP_CREDENTIALS,
+        },
+}
 
 # Gitlab Application configuration
 # ================================
